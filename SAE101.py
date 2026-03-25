@@ -1,9 +1,13 @@
 #Ex 1
 
 def nombre_eleves(tableau):
+    """
+    Entrée: un tableau de réponses
+    Renvoie le nombre d'élèves ayant répondu au questionnaire
+    """
     nbr=0
     for i in tableau:
-        if type(i)==str:
+        if type(i)==str: # Si l'élément du tableau est un string
             nbr+=1
     return nbr
 
@@ -18,9 +22,13 @@ test_nombre_eleves()
 #Ex 2
 
 def eleves(tableau):
+    """
+    Entrée: un tableau de réponses
+    Renvoie un tableau avec le nom des élèves
+    """
     tab_eleves=[]
     for i in tableau:
-        if type(i)==str:
+        if type(i)==str: # Si l'élément du tableau est un string
             tab_eleves.append(i)
     return tab_eleves
 
@@ -34,33 +42,40 @@ test_eleves()
 
 #Ex 3
 
-# Définition de la fonction lecture_fichier() qui prend en paramètre un nom de fichier et retourne un tableau de réponses. 
 def lecture_fichier(nom_fichier):
     """
     Entrée: fichier contenant les réponses
     Renvoie: tableau avec le nom des élèves et leurs réponses
+    La fonction lecture_fichier prend en paramètre un nom de fichier et retourne un tableau de réponses. 
     """
-    tab = [] # Créaton d'un tableau vide
-    fichier = open(nom_fichier, "r") # Ouverture du fichier
-    ligne = fichier.readline() # Lecture de la première ligne
-    while ligne != "": # Boucle de lecture jusqu’à la fin du fichier
-        ligne = ligne.strip() # Retirer les espaces et les retours à la ligne
-        ligne = ligne.replace(":", "/") # Uniformiser les séparateurs
-        temp = ligne.split("/") # Séparer les éléments
-        tab.append(temp[0]) # Ajoute le premier élément de la ligne
-        for x in temp[1:]: # Parcours le reste des éléments
-                tab.append(int(x)) # Les ajoute sous la forme d'entiers
-        ligne = fichier.readline() # Lecture de la ligne suivante
-    fichier.close() # Fermeture du fichier
-    return tab # Retour du tableau final
+    tab = []
+    fichier = open(nom_fichier, "r")
+    ligne = fichier.readline()
+    # Boucle de lecture jusqu’à la fin du fichier
+    while ligne != "": 
+        ligne = ligne.strip()
+        ligne = ligne.replace(":", "/") # Uniformiser les séparateurs afin de ne faire qu'un seul split
+        temp = ligne.split("/")
+        tab.append(temp[0]) # Ajoute le premier élément de la ligne (le nom de l'élève)
+        # Parcours le reste des éléments de la ligne (les réponses au questionnaire)
+        for x in temp[1:]: 
+                tab.append(int(x))
+        ligne = fichier.readline()
+    fichier.close() 
+    return tab
 
 #Ex 4
 
 def maison(tableau, indice):
-    maxi=1+indice
-    for i in range(1,5):
-        if tableau[i+indice]>tableau[maxi]:
+    """
+    Entrée: un tableau de réponses et l'indice d'un élève
+    Retourne la maison à laquelle l'élève est affecté
+    """
+    maxi=1+indice # maxi prend comme valeur la première réponse de l'élève
+    for i in range(1,5): # Parcours les 4 réponses de l'élève
+        if tableau[i+indice]>tableau[maxi]: # Recherche de maximum 
             maxi=i+indice
+    # Affectation à une maison
     if maxi-indice==1:
         return "Gryffondor"
     elif maxi-indice==2:
@@ -81,10 +96,14 @@ test_maison()
 #Ex 5
 
 def repartition(tableau):
+    """
+    Entrée: un tableau de réponses
+    Renvoie un dictionnaire dont les clés sont les noms des élèves et les valeurs la maison à laquelle les élèves sont affectés
+    """
     dic={}
     for i in range(len(tableau)):
-        if type(tableau[i])==str:
-            dic[tableau[i]]=maison(tableau,i)
+        if type(tableau[i])==str: # Si l'élément du tableau est un string
+            dic[tableau[i]]=maison(tableau,i) # Le nom de l'élève devient la clé et sa maison devient la valeur
     return dic
 
 def test_repartion():
@@ -97,10 +116,15 @@ test_repartion()
 
 #Ex 6
 
+from json import *
 def nb_erreurs(dict1, dict2):
+    """
+    Entrée: deux dictionnaires dont les clés sont des élèves
+    Renvoie renvoie dire le nombre de fois où les valeurs des deux dictionnaires sont différentes pour un même élève
+    """
     erreurs=0
     for i in dict1:
-        if dict1[i] != dict2[i]:
+        if dict1[i] != dict2[i]: # S'il y a une différence entre les éléments des dictionnaires
             erreurs += 1
     return erreurs
 
@@ -109,5 +133,39 @@ def test_nb_erreurs():
     assert nb_erreurs({"Harry Potter": "Gryffondor", "Cedric Diggory": "Poufsouffle", "Drago Malefoy": "Serpentard"}, {"Drago Malefoy": "Serpentard", "Cedric Diggory": "Poufsouffle", "Harry Potter": "Gryffondor"}) == 0
     assert nb_erreurs({"Harry Potter": "Gryffondor", "Cedric Diggory": "Poufsouffle", "Drago Malefoy": "Serpentard"}, {"Harry Potter": "Serdaigle", "Cedric Diggory": "Serdaigle", "Drago Malefoy": "Serdaigle"}) == 3
     print("Test nb_erreurs(): ok")
-
+    
 test_nb_erreurs()
+
+tab1 = lecture_fichier("questionnaire_premiere_annee.txt")
+dic1 = repartition(tab1) #dictionnaire obtenu à l'aide de la fonction
+fichier = open("affectation_premiere_annee.json", "r")
+dic2 = load(fichier) #dictionnaire obtenu à l'aide du choixpeau magique
+fichier.close
+print(nb_erreurs(dic1, dic2)*100/len(list(dic1))) #affichage du pourcentage d'erreurs
+
+#Ex 7
+
+from json import *
+from random import randint
+
+fichier = open("affectation_premiere_annee.json", "r")
+dico_eleves = load(fichier)
+fichier.close()
+dico_rand={}
+somme = 0
+
+for i in range(100):
+    for cle in dico_eleves: #parcours les noms des élèves
+        #affectation aléatoire des élèves
+        j = randint(1,4)
+        if j==1:
+            dico_rand[cle]="Gryffondor"
+        if j==2:
+            dico_rand[cle]="Serdaigle"
+        if j==3:
+            dico_rand[cle]="Poufsouffle"
+        else:
+            dico_rand[cle]="Serpentard"
+    somme += nb_erreurs(dico_eleves, dico_rand)
+    
+print(somme/100)
